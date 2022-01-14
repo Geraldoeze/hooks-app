@@ -18,11 +18,11 @@ const ingredientReducer = (currentIngredients, action) => {
       throw new Error('Should not get there!');    
   }
 }
-
+  
 
 const Ingredients = () => {
   const [userIngedients, dispatch] = useReducer(ingredientReducer, []);
-  useHttp();
+  const {isLoading, error, data, sendRequest } = useHttp();
   // const [ userIngedients, setUserIngredients] = useState([]);
   // const [ isLoading, setIsLoading] = useState(false);
   // const [ error, setError] = useState();
@@ -52,13 +52,13 @@ const Ingredients = () => {
 }, []); 
   
   const addIngredientHandler = useCallback(ingredient => {
-    dispatchHttp({type : 'SEND'});
+    // dispatchHttp({type : 'SEND'});
     fetch('https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json'}
     }).then( response => {
-        dispatchHttp({type:'RESPONSE'});
+        // dispatchHttp({type:'RESPONSE'});
       return response.json()
     }).then( responseData => {
         // setUserIngredients(prevIngredients => 
@@ -74,12 +74,13 @@ const Ingredients = () => {
 
     
   const removeIngredientHandler = useCallback(ingredientId => {
-    dispatchHttp({type:'SEND'});
+    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`,
+      'DELETE')
     
-  }, []);
+  }, [sendRequest]);
 
   const clearError = useCallback(() => {
-    dispatchHttp({type:'CLEAR'});
+    // dispatchHttp({type:'CLEAR'});
 
   }, [])
 
@@ -94,10 +95,10 @@ const Ingredients = () => {
 
   return (
     <div className="App">
-      {httpState.error && <ErrorModal onClose={clearError} >{httpState.error}</ErrorModal>}
+      {error && <ErrorModal onClose={clearError} >{error}</ErrorModal>}
       <IngredientForm 
         onAdd={addIngredientHandler}
-        loading={httpState.loading} />
+        loading={isLoading} />
 
       <section>
         <Search onLoadIngredients={filteredIngreHandler}/>

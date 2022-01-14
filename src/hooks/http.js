@@ -1,4 +1,4 @@
-import React, {useReducer} from "react";
+import React, {useReducer, useCallback} from "react";
 
 const httpReducer = (prevhttpState, action) => {
     switch (action.type) {
@@ -42,7 +42,8 @@ const httpReducer = (prevhttpState, action) => {
     return {
         isLoading: httpState.loading,
         data: httpState.data,
-        error: httpState.error
+        error: httpState.error,
+        sendRequest: sendRequest
     };
  };
 
