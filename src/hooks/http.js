@@ -1,11 +1,11 @@
-import React, {useReducer, useCallback} from "react";
+import {useReducer, useCallback} from "react";
 
 const httpReducer = (prevhttpState, action) => {
     switch (action.type) {
       case "SEND":
-        return { loading: true, error: null, data: null};
+        return { loading: true, error: null, data: null, extra: null, identifier: action.identifier };
       case "RESPONSE":
-        return {...prevhttpState, loading: false, data: action.responseData};
+        return {...prevhttpState, loading: false, data: action.responseData, extra:action.extra } ;
       case "ERROR":
         return { loading: false, error: action.errorMessage};
       case 'CLEAR':
@@ -20,10 +20,13 @@ const httpReducer = (prevhttpState, action) => {
         { 
             loading: false,
             error: null,
-            data: null})
+            data: null,
+            extra: null,
+            identifier: null
+        })
 
-    const sendRequest = (url, method, body) => {
-        dispatchHttp({ type: 'SEND'});
+    const sendRequest = (url, method, body, reqExtra, reqIdentifier) => {
+        dispatchHttp({ type: 'SEND', identifier: reqIdentifier});
      fetch(url, {
         method: method,
         body: body,
@@ -32,8 +35,12 @@ const httpReducer = (prevhttpState, action) => {
               return response.json();
       })
       .then(responseData =>{
-          dispatchHttp({ type: 'RESPONSE', responseData: responseData});
+          dispatchHttp({
+               type: 'RESPONSE',
+                responseData: responseData,
+                extra: reqExtra});
       })
+      
       .catch(error => {
         dispatchHttp({type:'ERROR', errorMessage: error.message});
       })
@@ -43,7 +50,9 @@ const httpReducer = (prevhttpState, action) => {
         isLoading: httpState.loading,
         data: httpState.data,
         error: httpState.error,
-        sendRequest: sendRequest
+        sendRequest: sendRequest,
+        reqExtra: httpState.extra,
+        reqIdentifier: httpState.identifier
     };
  };
 
