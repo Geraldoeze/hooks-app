@@ -11,7 +11,7 @@ const Search = React.memo(props => {
   const { onLoadIngredients } = props;
   const [enteredFilter, setEnteredFilter ] = useState(' ');
   const inputRef = useRef();
-  const {isLoading, data, error, sendRequest, clear} = useHttp
+  const {isLoading, data, error, sendRequest, clear} = useHttp();
 
   useEffect( (props) => {
     const timer = setTimeout(() =>{
@@ -19,7 +19,7 @@ const Search = React.memo(props => {
         const query = enteredFilter.length === 0
         ? ' ' 
         : `?orderBy="title"&equalTo="${enteredFilter}"`;
-      sendRequest('https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json' + query, 'GET');
+      //  sendRequest('https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json' + query, 'GET');
       }
       
     },500);

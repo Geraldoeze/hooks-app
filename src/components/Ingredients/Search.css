@@ -20,7 +20,7 @@
 
 .search-input input:focus {
   outline: none;
-  border-color: #ff2058;
+  border-color: rgb(14, 177, 241);
 }
 
 @media (min-width: 768px) {
