@@ -1,4 +1,4 @@
-import React, {useReducer, useState, useEffect, useCallback } from 'react';
+import React, {useReducer, useEffect, useCallback } from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -13,17 +13,31 @@ const ingredientReducer = (currentIngredients, action) => {
     case 'ADD' :
       return [...currentIngredients, action.ingredient];
     case 'DELETE' :
-      return currentIngredients.filter(ing.id !== action.id)
+      return currentIngredients.filter(ing => ing.id !== action.id)
       default:
         throw new Error(' Should not go there');
   }
 }
 
+const httpReducer = (curhttpState, action) => {
+  switch (action.type) {
+    case 'SEND':
+      return { loading: true, error: null};
+    case 'RESPONSE':
+      return {...curhttpState, loading: false};
+    case 'ERROR':
+      return {loading: false, error: action.errorMessage};
+    case 'CLEAR':
+      return {...curhttpState, error: null};  
+    default:
+      throw new Error('Error')  
+  }
+}
+
 const Ingredients = () => {
   const [userIngredients, dispatch] = useReducer(ingredientReducer, []);
-  const [isLoading, setIsLoading] = useState(false);
-  const [ userIngredients, setUserIngredients] = useState([]);
-  const [error, setError] = useState();
+  const [httpState, dispatchHttp] = useReducer(httpReducer, {loading: true, error: null})
+  
 
   useEffect(() => {
     console.log('RENDERING INGREDIENTS', userIngredients)
@@ -34,60 +48,46 @@ const Ingredients = () => {
   }, [])
       
   const addIngredientHandler = ingredient => {
-    setIsLoading(true)
-    setUserIngredients(prevIngredients => 
-      [...prevIngredients,
-         {id: Math.random().toString(),
-        ...ingredient 
-        }
-      ]
-    )
+    dispatchHttp({type: 'SEND'})
+  
     fetch( `https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json`,{
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     })
     .then(response => { 
-      setIsLoading(false);
+      dispatchHttp({type: 'RESPONSE'})
       // this fetches the response from firebase that has a unique id
       return response.json();
     }).then(responseData => {
       // the unique id is passed to our userIngredients
-        setUserIngredients(prevIngredients => 
-          [...prevIngredients,
-            {id: responseData.name,
-            ...ingredient 
-            }
-          ]
-        )
+       dispatch({ type: 'ADD', ingredient: { id: responseData.name, ...ingredient}})
     })
   }
 
   const removeIngredientHandler = ingredientId => {
-    setIsLoading(true);
+    dispatchHttp({type: 'SEND'});
     fetch( `https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`,{
       method: 'DELETE'
     }).then( response => {
-      setIsLoading(false);
-      setUserIngredients(prevIngredients => 
-      prevIngredients.filter( ingredient => ingredient.id !== ingredientId))
+      dispatchHttp({type: 'RESPONSE'})
+      dispatch({type: 'DELETE', id: ingredientId})
     }).catch(error => {
-      setError(error.message);   
-      setIsLoading(false);
+      dispatchHttp({type: 'ERROR', errorMessage: error.message})
 
     })
   }
 
   const clearError = () => {
-    setError(null);
+    dispatchHttp({type: 'CLEAR'});
   }
 
   return (
     <div className="App">
-      {error && <ErrorModal onClose={clearError}> { error } </ErrorModal>}
+      {httpState.error && <ErrorModal onClose={clearError}> { httpState.error } </ErrorModal>}
       <IngredientForm 
         onAddIngredient={addIngredientHandler}
-        loading={isLoading}
+        loading={httpState.loading}
          />
 
       <section>
