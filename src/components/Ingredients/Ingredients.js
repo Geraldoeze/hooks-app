@@ -11,7 +11,9 @@ const ingredientReducer = (currentIngredients, action) => {
     case 'SET':
       return action.ingredients;
     case 'ADD' :
-      return [...currentIngredients, action.ingredient];
+      return [...currentIngredients,
+          action.ingredients
+        ];
     case 'DELETE' :
       return currentIngredients.filter(ing => ing.id !== action.id)
       default:
@@ -30,44 +32,47 @@ const Ingredients = () => {
     sendRequest, 
     reqExtra, 
     reqIdentifier,
-    clear } = useHttp();
+    clear,
+    spin } = useHttp();
 
   useEffect(() => {
     if (!isLoading && !error && reqIdentifier ==='REMOVE_INGREDIENT') {
       dispatch({type: 'DELETE', id: reqExtra})
     } 
     else if (!isLoading && !error && reqIdentifier ==='ADD_INGREDIENT') {
-      dispatch({ type: 'ADD', ingredient: 
+      dispatch({ type: 'ADD', ingredients: 
+      // something else must be added to this to update the DOM
         { id: data.name, ...reqExtra}})
     }
+    console.log(data)
   }, [data, reqExtra, reqIdentifier, isLoading, error ]);
 
   const filteredIngredientsHandler = useCallback((filteredIngredient) => {
     dispatch({type: 'SET',
        ingredients: filteredIngredient});
-    
-    // dispatchHttp({type: 'RESPONSE'});
-  }, [])
+      //  clears the spinner
+    spin()
+  }, [spin])
       
+  
   const addIngredientHandler = useCallback(ingredient => {
-    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json`, 
+    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.son`, 
     'POST',
     JSON.stringify(ingredient),
     ingredient,
     'ADD_INGREDIENT'); 
-    
+    console.log(ingredient)
   }, [sendRequest]);
 
   const removeIngredientHandler = useCallback(ingredientId => {
-    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients/${ingredientId}.jon`,
+    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients/${ingredientId}.json`,
       'DELETE',
       null,
       ingredientId,
       'REMOVE_INGREDIENT'
       );
-    
+    console.log(ingredientId)
   }, [sendRequest]);
-
 
 
   const ingredientList = useMemo(() => {

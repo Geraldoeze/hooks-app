@@ -13,11 +13,13 @@ const httpReducer = (curhttpState, action) => {
       case 'SEND':
         return { loading: true, error: null, data: null, extra: null, identifier: action.identifier};
       case 'RESPONSE':
-        return {...curhttpState, loading: false, data: action.responseData, extra: action.extra};
+        return {...curhttpState, loading: false, data: action.responseData, extra: action.reqExtra};
       case 'ERROR':
         return {loading: false, error: action.errorMessage};
       case 'CLEAR':
         return initialState;  
+      case 'SPIN':
+          return { ...curhttpState, loading: false};  
       default:
         throw new Error('Error')  
     }
@@ -28,7 +30,10 @@ const useHttp = () => {
 
     const clear = useCallback(() => dispatchHttp({type: 'CLEAR'}), [] );
 
+    const spinner = useCallback(() => dispatchHttp({type: 'SPIN'}),[])
+
     const sendRequest = useCallback((url, method, body, reqExtra, reqIdentifier) => {
+        console.log(reqExtra)
         dispatchHttp({type: 'SEND', identifier: reqIdentifier });
         fetch( 
             url, 
@@ -40,6 +45,8 @@ const useHttp = () => {
         }).then( response => {
         return response.json();
         }).then(responseData => {
+            console.log(responseData)
+
             dispatchHttp({type: 'RESPONSE', responseData: responseData, reqExtra: reqExtra})
         })
         .catch(error => {
@@ -55,7 +62,8 @@ const useHttp = () => {
         sendRequest: sendRequest,
         reqExtra: httpState.extra,
         reqIdentifier: httpState.identifier,
-        clear: clear
+        clear: clear,
+        spin: spinner
     } 
 };
 
