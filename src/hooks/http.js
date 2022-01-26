@@ -17,7 +17,7 @@ const httpReducer = (curhttpState, action) => {
       case 'ERROR':
         return {loading: false, error: action.errorMessage};
       case 'CLEAR':
-        return initialState;  
+        return initialState
       case 'SPIN':
           return { ...curhttpState, loading: false};  
       default:
