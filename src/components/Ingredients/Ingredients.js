@@ -56,7 +56,7 @@ const Ingredients = () => {
       
   
   const addIngredientHandler = useCallback(ingredient => {
-    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.son`, 
+    sendRequest(`https://react-hooks-f4580-default-rtdb.firebaseio.com/ingredients.json`, 
     'POST',
     JSON.stringify(ingredient),
     ingredient,
